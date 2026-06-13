@@ -1,0 +1,22 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body {
+  background: linear-gradient(135deg, #0b1020, #121935);
+  color: #e7ecff;
+  min-height: 100vh;
+  font-family: "Segoe UI", system-ui, sans-serif;
+}
+
+::-webkit-scrollbar { width: 8px; height: 8px; }
+::-webkit-scrollbar-track { background: #161d3d; }
+::-webkit-scrollbar-thumb { background: #2a3470; border-radius: 4px; }
+::-webkit-scrollbar-thumb:hover { background: #7c5cff; }
+
+.gradient-text {
+  background: linear-gradient(90deg, #7c5cff, #3ddc97);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
