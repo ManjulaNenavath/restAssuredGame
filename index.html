@@ -131,36 +131,67 @@
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.45.0/min/vs/loader.min.js"><\/script>
 <script>
-/* ========= MONACO SETUP ========= */
+/* ========= MONACO SETUP (optional — falls back to <pre> if CDN fails) ========= */
 let monacoReady = false;
 const pendingEditors = [];
-require.config({ paths: { vs: 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.45.0/min/vs' }});
-require(['vs/editor/editor.main'], function() {
-  monacoReady = true;
-  pendingEditors.forEach(fn => fn());
-  pendingEditors.length = 0;
-});
+try {
+  if (typeof require !== 'undefined') {
+    require.config({ paths: { vs: 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.45.0/min/vs' }});
+    require(['vs/editor/editor.main'], function() {
+      monacoReady = true;
+      pendingEditors.forEach(fn => fn());
+      pendingEditors.length = 0;
+    });
+  } else {
+    console.warn('Monaco loader unavailable — falling back to plain text code blocks');
+  }
+} catch(e){ console.warn('Monaco init failed', e); }
+
+function renderFallback(id, value){
+  const el = document.getElementById(id);
+  if(!el || el.dataset.mounted) return;
+  el.dataset.mounted = '1';
+  el.style.height = 'auto';
+  el.innerHTML = '<pre style="margin:0;padding:14px;background:#0a0f24;color:#cfd8ff;font-family:Consolas,monospace;font-size:13px;overflow-x:auto;white-space:pre">'+
+    value.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')+'</pre>';
+}
+
 function makeEditor(id, value, opts={}){
-  const fn = () => {
+  const mount = () => {
     const el = document.getElementById(id);
     if(!el || el.dataset.mounted) return;
+    if(!monacoReady || typeof monaco === 'undefined'){
+      renderFallback(id, value); return;
+    }
     el.dataset.mounted = '1';
-    const editor = monaco.editor.create(el, {
-      value,
-      language: opts.language || 'java',
-      theme: 'vs-dark',
-      readOnly: opts.readOnly !== false,
-      minimap: { enabled: false },
-      scrollBeyondLastLine: false,
-      fontSize: 13,
-      lineNumbers: opts.lineNumbers || 'on',
-      automaticLayout: true,
-      wordWrap: 'on'
-    });
-    if(opts.onCreate) opts.onCreate(editor);
-    el._editor = editor;
+    try {
+      monaco.editor.create(el, {
+        value,
+        language: opts.language || 'java',
+        theme: 'vs-dark',
+        readOnly: opts.readOnly !== false,
+        minimap: { enabled: false },
+        scrollBeyondLastLine: false,
+        fontSize: 13,
+        lineNumbers: opts.lineNumbers || 'on',
+        automaticLayout: true,
+        wordWrap: 'on'
+      });
+    } catch(e){
+      console.warn('Monaco failed for '+id, e);
+      el.dataset.mounted = '';
+      renderFallback(id, value);
+    }
   };
-  if(monacoReady) fn(); else pendingEditors.push(fn);
+  if(monacoReady) mount();
+  else {
+    pendingEditors.push(mount);
+    // After 3s, give up waiting and render plain text fallback
+    setTimeout(()=>{
+      const el = document.getElementById(id);
+      if(el && !el.dataset.mounted) renderFallback(id, value);
+    }, 3000);
+  }
 }
 
 /* ========= CONFETTI ========= */
