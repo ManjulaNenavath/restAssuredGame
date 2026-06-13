@@ -114,7 +114,10 @@ export default function Home() {
         >
           ☰
         </button>
-        <h1 className="text-xl font-bold gradient-text">🚀 RestAssured Mastery</h1>
+        <div>
+          <h1 className="text-xl font-bold gradient-text">🚀 RestAssured Mastery</h1>
+          <div className="text-xs text-muted">by Manjula Nenavath</div>
+        </div>
         <div className="flex-1 min-w-[200px]">
           <div className="h-2.5 bg-panel rounded overflow-hidden">
             <motion.div
