@@ -1,0 +1,1138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>RestAssured Mastery — Become a Senior API Tester</title>
+<style>
+  :root{
+    --bg:#0b1020; --bg2:#121935; --panel:#161d3d; --panel2:#1d2654;
+    --text:#e7ecff; --muted:#9aa6d1; --accent:#7c5cff; --accent2:#3ddc97;
+    --danger:#ff5d6c; --warn:#ffb84d; --info:#4ec3ff;
+    --code:#0a0f24; --border:#2a3470;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;font-family:'Segoe UI',system-ui,sans-serif;background:linear-gradient(135deg,var(--bg),var(--bg2));color:var(--text);min-height:100vh}
+  header{position:sticky;top:0;z-index:10;background:rgba(11,16,32,.92);backdrop-filter:blur(8px);border-bottom:1px solid var(--border);padding:12px 20px;display:flex;align-items:center;gap:16px;flex-wrap:wrap}
+  header h1{margin:0;font-size:20px;background:linear-gradient(90deg,var(--accent),var(--accent2));-webkit-background-clip:text;color:transparent}
+  .progress-wrap{flex:1;min-width:200px}
+  .progress-bar{height:10px;background:var(--panel);border-radius:6px;overflow:hidden}
+  .progress-fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent2));width:0%;transition:width .4s}
+  .progress-text{font-size:12px;color:var(--muted);margin-top:4px}
+  .layout{display:grid;grid-template-columns:280px 1fr;min-height:calc(100vh - 65px)}
+  nav.sidebar{background:var(--panel);border-right:1px solid var(--border);padding:16px;overflow-y:auto;max-height:calc(100vh - 65px);position:sticky;top:65px}
+  .phase{margin-bottom:10px}
+  .phase-title{font-size:11px;text-transform:uppercase;letter-spacing:1.5px;color:var(--accent2);margin:12px 0 6px;font-weight:700}
+  .nav-item{display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:6px;cursor:pointer;font-size:14px;color:var(--muted);margin-bottom:2px;transition:all .15s}
+  .nav-item:hover{background:var(--panel2);color:var(--text)}
+  .nav-item.active{background:linear-gradient(90deg,rgba(124,92,255,.25),transparent);color:var(--text);border-left:3px solid var(--accent)}
+  .nav-item .check{font-size:12px}
+  .nav-item.done .check{color:var(--accent2)}
+  main{padding:30px 40px;overflow-x:hidden}
+  .module{display:none;animation:fadeIn .35s ease}
+  .module.active{display:block}
+  @keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+  h2.module-title{font-size:28px;margin:0 0 6px;background:linear-gradient(90deg,var(--accent),var(--accent2));-webkit-background-clip:text;color:transparent}
+  .module-sub{color:var(--muted);margin-bottom:20px}
+  .card{background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:20px;margin-bottom:18px;box-shadow:0 4px 12px rgba(0,0,0,.2)}
+  .card h3{margin-top:0;color:var(--accent2)}
+  pre{background:var(--code);border:1px solid var(--border);border-radius:8px;padding:14px;overflow-x:auto;font-family:'Consolas',monospace;font-size:13px;line-height:1.6;color:#cfd8ff;position:relative}
+  code{color:#ffb84d}
+  .kw{color:#ff79c6}.str{color:#a5e76b}.cm{color:#6a7ab0;font-style:italic}.fn{color:#4ec3ff}.num{color:#ffb84d}
+  .btn{background:linear-gradient(135deg,var(--accent),#5d3fff);color:#fff;border:none;padding:10px 18px;border-radius:8px;cursor:pointer;font-weight:600;font-size:14px;transition:transform .15s,box-shadow .15s}
+  .btn:hover{transform:translateY(-1px);box-shadow:0 6px 16px rgba(124,92,255,.4)}
+  .btn-success{background:linear-gradient(135deg,var(--accent2),#2ab87a)}
+  .btn-ghost{background:transparent;border:1px solid var(--border);color:var(--text)}
+  .pill{display:inline-block;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:600;margin-right:6px}
+  .pill-get{background:rgba(78,195,255,.2);color:var(--info)}
+  .pill-post{background:rgba(61,220,151,.2);color:var(--accent2)}
+  .pill-put{background:rgba(255,184,77,.2);color:var(--warn)}
+  .pill-del{background:rgba(255,93,108,.2);color:var(--danger)}
+  .quiz-q{padding:14px;background:var(--panel2);border-radius:8px;margin-bottom:10px;cursor:pointer;border:2px solid transparent;transition:all .15s}
+  .quiz-q:hover{border-color:var(--accent)}
+  .quiz-q.correct{background:rgba(61,220,151,.15);border-color:var(--accent2)}
+  .quiz-q.wrong{background:rgba(255,93,108,.15);border-color:var(--danger)}
+  .game-area{background:var(--panel2);border-radius:10px;padding:20px;margin:14px 0;min-height:140px}
+  .drag-item{background:var(--panel);border:2px solid var(--border);padding:10px 14px;border-radius:8px;margin:6px;display:inline-block;cursor:grab;font-family:'Consolas',monospace;font-size:13px;user-select:none}
+  .drag-item.dragging{opacity:.4}
+  .drop-zone{min-height:60px;border:2px dashed var(--border);border-radius:8px;padding:10px;margin:6px 0;transition:all .15s}
+  .drop-zone.over{border-color:var(--accent2);background:rgba(61,220,151,.08)}
+  .status-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(110px,1fr));gap:10px;margin:14px 0}
+  .status-card{background:var(--panel);border:2px solid var(--border);padding:14px;border-radius:8px;text-align:center;cursor:pointer;transition:all .15s;font-weight:700;font-size:18px}
+  .status-card:hover{border-color:var(--accent)}
+  .status-card.selected{border-color:var(--accent2);background:rgba(61,220,151,.15)}
+  .feedback{margin-top:12px;padding:12px;border-radius:8px;font-weight:600;display:none}
+  .feedback.show{display:block}
+  .feedback.ok{background:rgba(61,220,151,.15);color:var(--accent2);border:1px solid var(--accent2)}
+  .feedback.err{background:rgba(255,93,108,.15);color:var(--danger);border:1px solid var(--danger)}
+  .editor{background:var(--code);border:1px solid var(--border);border-radius:8px;padding:12px;font-family:'Consolas',monospace;font-size:13px;color:#cfd8ff;width:100%;min-height:160px;resize:vertical}
+  table{width:100%;border-collapse:collapse;margin:10px 0}
+  th,td{padding:10px;border-bottom:1px solid var(--border);text-align:left;font-size:14px}
+  th{background:var(--panel2);color:var(--accent2)}
+  .badge{display:inline-block;padding:4px 10px;border-radius:6px;font-size:11px;font-weight:700;background:rgba(124,92,255,.2);color:var(--accent);margin-left:6px}
+  .topic-nav{display:flex;gap:8px;margin-bottom:20px;flex-wrap:wrap}
+  .topic-nav button{background:var(--panel2);border:1px solid var(--border);color:var(--muted);padding:6px 12px;border-radius:20px;cursor:pointer;font-size:12px}
+  .topic-nav button.active{background:var(--accent);color:#fff;border-color:var(--accent)}
+  .score-badge{position:fixed;bottom:20px;right:20px;background:var(--panel);border:1px solid var(--accent);padding:10px 16px;border-radius:30px;font-weight:700;box-shadow:0 4px 20px rgba(124,92,255,.4);z-index:50}
+  .menu-toggle{display:none;background:var(--panel);border:1px solid var(--border);color:var(--text);padding:6px 10px;border-radius:6px;cursor:pointer}
+  @media(max-width:900px){
+    .layout{grid-template-columns:1fr}
+    nav.sidebar{position:fixed;left:-280px;top:65px;width:280px;height:calc(100vh - 65px);transition:left .3s;z-index:20}
+    nav.sidebar.open{left:0}
+    .menu-toggle{display:block}
+    main{padding:20px}
+  }
+  .hero-cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px;margin-top:20px}
+  .hero-card{background:linear-gradient(135deg,var(--panel),var(--panel2));border:1px solid var(--border);border-radius:12px;padding:18px;cursor:pointer;transition:transform .2s}
+  .hero-card:hover{transform:translateY(-4px);border-color:var(--accent)}
+  .hero-card .icon{font-size:32px;margin-bottom:8px}
+  .hero-card h4{margin:6px 0;color:var(--accent2)}
+  .hero-card p{margin:0;font-size:13px;color:var(--muted)}
+  .req-builder{display:grid;grid-template-columns:120px 1fr;gap:10px;align-items:center;margin:8px 0}
+  .req-builder select,.req-builder input{background:var(--code);border:1px solid var(--border);color:var(--text);padding:8px;border-radius:6px;font-family:'Consolas',monospace;font-size:13px;width:100%}
+  .response-box{background:var(--code);border:1px solid var(--border);border-radius:8px;padding:14px;margin-top:10px;font-family:'Consolas',monospace;font-size:13px;white-space:pre-wrap;color:#a5e76b;max-height:280px;overflow-y:auto}
+  .level-up{position:fixed;inset:0;display:none;align-items:center;justify-content:center;background:rgba(0,0,0,.85);z-index:100}
+  .level-up.show{display:flex;animation:fadeIn .3s}
+  .level-up-card{background:linear-gradient(135deg,var(--accent),var(--accent2));padding:40px 60px;border-radius:20px;text-align:center;font-size:24px;font-weight:700;box-shadow:0 0 60px var(--accent)}
+</style>
+</head>
+<body>
+
+<header>
+  <button class="menu-toggle" onclick="document.querySelector('.sidebar').classList.toggle('open')">☰</button>
+  <h1>🚀 RestAssured Mastery</h1>
+  <div class="progress-wrap">
+    <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+    <div class="progress-text" id="progressText">0 / 20 modules complete</div>
+  </div>
+  <button class="btn btn-ghost" onclick="resetProgress()">Reset</button>
+</header>
+
+<div class="layout">
+  <nav class="sidebar" id="sidebar"></nav>
+  <main id="main"></main>
+</div>
+
+<div class="score-badge">⭐ XP: <span id="xp">0</span></div>
+<div class="level-up" id="levelUp"><div class="level-up-card" id="levelUpText">🎉 Level Up!</div></div>
+
+<script>
+/* ========= CURRICULUM DATA ========= */
+const MODULES = [
+  {phase:"Phase 1 — Foundations", items:[
+    {id:"intro", title:"1. What is RestAssured?", icon:"📚"},
+    {id:"http", title:"2. HTTP & REST Basics", icon:"🌐"},
+    {id:"setup", title:"3. Setup & Dependencies", icon:"⚙️"},
+    {id:"bdd", title:"4. BDD Syntax (Given/When/Then)", icon:"🎭"},
+  ]},
+  {phase:"Phase 2 — Core API Testing", items:[
+    {id:"get", title:"5. GET Requests", icon:"📥"},
+    {id:"post", title:"6. POST Requests", icon:"📤"},
+    {id:"putdel", title:"7. PUT, PATCH, DELETE", icon:"🔄"},
+    {id:"specs", title:"8. Request & Response Specs", icon:"📋"},
+  ]},
+  {phase:"Phase 3 — Data Handling", items:[
+    {id:"jsonpath", title:"9. JSONPath Mastery", icon:"🎯"},
+    {id:"pojo", title:"10. POJOs & Serialization", icon:"🧬"},
+    {id:"schema", title:"11. Schema Validation", icon:"✅"},
+  ]},
+  {phase:"Phase 4 — Auth & Security", items:[
+    {id:"auth", title:"12. Authentication", icon:"🔐"},
+    {id:"ssl", title:"13. SSL, Headers, Cookies", icon:"🍪"},
+  ]},
+  {phase:"Phase 5 — Advanced", items:[
+    {id:"files", title:"14. File Upload/Download", icon:"📎"},
+    {id:"filters", title:"15. Filters & Logging", icon:"🔍"},
+  ]},
+  {phase:"Phase 6 — Framework Design", items:[
+    {id:"testng", title:"16. TestNG Integration", icon:"🧪"},
+    {id:"ddt", title:"17. Data-Driven Testing", icon:"📊"},
+    {id:"cicd", title:"18. CI/CD & Reporting", icon:"🚀"},
+  ]},
+  {phase:"Phase 7 — Senior Level", items:[
+    {id:"patterns", title:"19. Framework Architecture", icon:"🏗️"},
+    {id:"interview", title:"20. Interview Boss Battle", icon:"👑"},
+  ]},
+];
+
+/* ========= MODULE CONTENT ========= */
+const CONTENT = {
+intro:`
+<h2 class="module-title">📚 What is RestAssured?</h2>
+<p class="module-sub">Your journey to senior API tester starts here.</p>
+<div class="card">
+<h3>The Story</h3>
+<p>RestAssured is a Java library that makes API testing as simple as writing English. Instead of dealing with raw HTTP clients, you write fluent, readable test code.</p>
+<pre><span class="cm">// Without RestAssured (using HttpClient)</span>
+<span class="kw">HttpClient</span> client = HttpClient.newHttpClient();
+HttpRequest req = HttpRequest.newBuilder()
+    .uri(URI.create(<span class="str">"https://api.example.com/users/1"</span>))
+    .build();
+<span class="cm">// ...50 more lines of parsing JSON, asserting...</span>
+
+<span class="cm">// With RestAssured ✨</span>
+given().when().get(<span class="str">"/users/1"</span>).then().statusCode(<span class="num">200</span>);</pre>
+</div>
+<div class="card">
+<h3>Why senior testers love it</h3>
+<ul>
+<li>✅ <b>BDD-style readability</b> — given/when/then matches how QA thinks</li>
+<li>✅ <b>Powerful JSONPath/XMLPath</b> — extract any field in one line</li>
+<li>✅ <b>Built-in assertions</b> — Hamcrest matchers</li>
+<li>✅ <b>Schema validation</b> — JSON Schema, XSD out of the box</li>
+<li>✅ <b>Auth helpers</b> — OAuth2, Basic, Digest, Bearer</li>
+</ul>
+</div>
+<div class="card">
+<h3>🎮 Mini-Game: Spot the RestAssured code</h3>
+<p>Which snippet uses RestAssured?</p>
+<div class="quiz-q" onclick="quizAnswer(this,false)">A) <code>HttpURLConnection conn = url.openConnection();</code></div>
+<div class="quiz-q" onclick="quizAnswer(this,true,'intro')">B) <code>given().get("/users").then().statusCode(200);</code></div>
+<div class="quiz-q" onclick="quizAnswer(this,false)">C) <code>request("GET", url, callback);</code></div>
+<div class="feedback" id="fb-intro"></div>
+</div>
+`,
+http:`
+<h2 class="module-title">🌐 HTTP & REST Basics</h2>
+<p class="module-sub">You can't test APIs without knowing what's under the hood.</p>
+<div class="card">
+<h3>HTTP Methods Cheat Sheet</h3>
+<table>
+<tr><th>Method</th><th>Purpose</th><th>Idempotent?</th></tr>
+<tr><td><span class="pill pill-get">GET</span></td><td>Read data</td><td>✅ Yes</td></tr>
+<tr><td><span class="pill pill-post">POST</span></td><td>Create new</td><td>❌ No</td></tr>
+<tr><td><span class="pill pill-put">PUT</span></td><td>Replace fully</td><td>✅ Yes</td></tr>
+<tr><td><span class="pill pill-put">PATCH</span></td><td>Partial update</td><td>❌ No</td></tr>
+<tr><td><span class="pill pill-del">DELETE</span></td><td>Remove</td><td>✅ Yes</td></tr>
+</table>
+</div>
+<div class="card">
+<h3>🎮 Game: Status Code Match</h3>
+<p>I'll describe a scenario — pick the right status code!</p>
+<div id="statusGame"></div>
+<div class="status-grid" id="statusGrid"></div>
+<div class="feedback" id="fb-http"></div>
+<button class="btn" onclick="nextStatusRound()">Next Scenario →</button>
+</div>
+<div class="card">
+<h3>REST Principles (the senior asks these)</h3>
+<ul>
+<li><b>Stateless</b> — every request carries its own context</li>
+<li><b>Resource-oriented</b> — URLs name things, methods do verbs</li>
+<li><b>Uniform interface</b> — same patterns everywhere</li>
+<li><b>Cacheable</b> — responses say if they can be cached</li>
+</ul>
+</div>
+`,
+setup:`
+<h2 class="module-title">⚙️ Setup & Dependencies</h2>
+<p class="module-sub">Get your project ready in 60 seconds.</p>
+<div class="card">
+<h3>Maven (pom.xml)</h3>
+<pre><span class="kw">&lt;dependency&gt;</span>
+  &lt;groupId&gt;<span class="str">io.rest-assured</span>&lt;/groupId&gt;
+  &lt;artifactId&gt;<span class="str">rest-assured</span>&lt;/artifactId&gt;
+  &lt;version&gt;<span class="num">5.4.0</span>&lt;/version&gt;
+  &lt;scope&gt;<span class="str">test</span>&lt;/scope&gt;
+<span class="kw">&lt;/dependency&gt;</span>
+<span class="kw">&lt;dependency&gt;</span>
+  &lt;groupId&gt;<span class="str">io.rest-assured</span>&lt;/groupId&gt;
+  &lt;artifactId&gt;<span class="str">json-schema-validator</span>&lt;/artifactId&gt;
+  &lt;version&gt;<span class="num">5.4.0</span>&lt;/version&gt;
+<span class="kw">&lt;/dependency&gt;</span></pre>
+</div>
+<div class="card">
+<h3>Static Imports — memorize these!</h3>
+<pre><span class="kw">import static</span> io.restassured.RestAssured.*;
+<span class="kw">import static</span> io.restassured.matcher.RestAssuredMatchers.*;
+<span class="kw">import static</span> org.hamcrest.Matchers.*;</pre>
+<p>Without these 3 imports, <code>given()</code>, <code>equalTo()</code>, etc. won't resolve.</p>
+</div>
+<div class="card">
+<h3>🎮 Drag-and-drop: Build the imports</h3>
+<p>Arrange these import statements in any working test file:</p>
+<div id="dragSource">
+<div class="drag-item" draggable="true">import static io.restassured.RestAssured.*;</div>
+<div class="drag-item" draggable="true">import static org.hamcrest.Matchers.*;</div>
+<div class="drag-item" draggable="true">import org.testng.annotations.Test;</div>
+</div>
+<div class="drop-zone" id="dropZone">Drop here ↓</div>
+<button class="btn" onclick="completeModule('setup')">I've Got It ✓</button>
+</div>
+`,
+bdd:`
+<h2 class="module-title">🎭 BDD Syntax: Given / When / Then</h2>
+<p class="module-sub">The heartbeat of every RestAssured test.</p>
+<div class="card">
+<h3>The Pattern</h3>
+<pre><span class="fn">given</span>()  <span class="cm">// preconditions: headers, params, auth, body</span>
+  .header(<span class="str">"Content-Type"</span>, <span class="str">"application/json"</span>)
+  .body(payload)
+<span class="fn">.when</span>()  <span class="cm">// the action: GET, POST, etc.</span>
+  .post(<span class="str">"/users"</span>)
+<span class="fn">.then</span>()  <span class="cm">// assertions on the response</span>
+  .statusCode(<span class="num">201</span>)
+  .body(<span class="str">"name"</span>, equalTo(<span class="str">"John"</span>));</pre>
+</div>
+<div class="card">
+<h3>🎮 Game: Drag the clauses in order</h3>
+<div class="game-area">
+<p>Drag these into the correct order:</p>
+<div id="bddSource">
+<div class="drag-item" draggable="true" data-order="3">.then().statusCode(200)</div>
+<div class="drag-item" draggable="true" data-order="1">given().header("X-Auth","abc")</div>
+<div class="drag-item" draggable="true" data-order="2">.when().get("/api")</div>
+</div>
+<div class="drop-zone bdd-zone" data-pos="1">1. Setup</div>
+<div class="drop-zone bdd-zone" data-pos="2">2. Action</div>
+<div class="drop-zone bdd-zone" data-pos="3">3. Assertion</div>
+<button class="btn" onclick="checkBDD()">Check Order</button>
+<div class="feedback" id="fb-bdd"></div>
+</div>
+</div>
+`,
+get:`
+<h2 class="module-title">📥 GET Requests</h2>
+<p class="module-sub">The simplest, most common test.</p>
+<div class="card">
+<h3>Basic GET</h3>
+<pre><span class="fn">given</span>()
+  .baseUri(<span class="str">"https://reqres.in/api"</span>)
+<span class="fn">.when</span>()
+  .get(<span class="str">"/users/2"</span>)
+<span class="fn">.then</span>()
+  .statusCode(<span class="num">200</span>)
+  .body(<span class="str">"data.id"</span>, equalTo(<span class="num">2</span>))
+  .body(<span class="str">"data.first_name"</span>, equalTo(<span class="str">"Janet"</span>));</pre>
+</div>
+<div class="card">
+<h3>Query & Path Params</h3>
+<pre><span class="fn">given</span>()
+  .pathParam(<span class="str">"id"</span>, <span class="num">2</span>)
+  .queryParam(<span class="str">"delay"</span>, <span class="num">3</span>)
+<span class="fn">.when</span>()
+  .get(<span class="str">"/users/{id}"</span>)
+<span class="fn">.then</span>()
+  .statusCode(<span class="num">200</span>);</pre>
+</div>
+<div class="card">
+<h3>🎮 Interactive API Sandbox</h3>
+<p>Build a GET request — we'll simulate the response.</p>
+<div class="req-builder"><label>Method:</label><select disabled><option>GET</option></select></div>
+<div class="req-builder"><label>URL:</label><input id="getUrl" value="/users/2"></div>
+<div class="req-builder"><label>Path Param id:</label><input id="getId" value="2"></div>
+<button class="btn" onclick="simulateGet()">Send Request 🚀</button>
+<div class="response-box" id="getResp">Response will appear here...</div>
+<button class="btn btn-success" onclick="completeModule('get')" style="margin-top:10px">Mark Complete ✓</button>
+</div>
+`,
+post:`
+<h2 class="module-title">📤 POST Requests</h2>
+<p class="module-sub">Creating resources with payloads.</p>
+<div class="card">
+<h3>POST with JSON body</h3>
+<pre><span class="kw">String</span> payload = <span class="str">"""
+  {"name":"John","job":"QA Lead"}
+"""</span>;
+
+<span class="fn">given</span>()
+  .contentType(ContentType.JSON)
+  .body(payload)
+<span class="fn">.when</span>()
+  .post(<span class="str">"/users"</span>)
+<span class="fn">.then</span>()
+  .statusCode(<span class="num">201</span>)
+  .body(<span class="str">"name"</span>, equalTo(<span class="str">"John"</span>))
+  .body(<span class="str">"id"</span>, notNullValue());</pre>
+</div>
+<div class="card">
+<h3>POST using a Map (preferred)</h3>
+<pre><span class="kw">Map</span>&lt;String,Object&gt; body = <span class="kw">new</span> HashMap&lt;&gt;();
+body.put(<span class="str">"name"</span>, <span class="str">"John"</span>);
+body.put(<span class="str">"job"</span>, <span class="str">"QA Lead"</span>);
+
+<span class="fn">given</span>().contentType(ContentType.JSON).body(body)
+<span class="fn">.when</span>().post(<span class="str">"/users"</span>)
+<span class="fn">.then</span>().statusCode(<span class="num">201</span>);</pre>
+<p>✨ <b>Senior tip:</b> RestAssured auto-serializes Maps and POJOs to JSON.</p>
+</div>
+<div class="card">
+<h3>🎮 Build the request payload</h3>
+<p>Fix the bug in this POST:</p>
+<pre id="bugCode">given()
+  .body(payload)        <span class="cm">// Bug: missing something here!</span>
+.when().post("/users")
+.then().statusCode(201);</pre>
+<p>What's missing?</p>
+<div class="quiz-q" onclick="quizAnswer(this,false)">A) <code>.header("Accept","json")</code></div>
+<div class="quiz-q" onclick="quizAnswer(this,true,'post')">B) <code>.contentType(ContentType.JSON)</code></div>
+<div class="quiz-q" onclick="quizAnswer(this,false)">C) <code>.auth().basic(...)</code></div>
+<div class="feedback" id="fb-post"></div>
+</div>
+`,
+putdel:`
+<h2 class="module-title">🔄 PUT, PATCH, DELETE</h2>
+<p class="module-sub">The full CRUD experience.</p>
+<div class="card">
+<h3>PUT — Full Update</h3>
+<pre><span class="fn">given</span>().contentType(ContentType.JSON)
+  .body(<span class="str">"""{"name":"Jane","job":"Architect"}"""</span>)
+<span class="fn">.when</span>().put(<span class="str">"/users/2"</span>)
+<span class="fn">.then</span>().statusCode(<span class="num">200</span>);</pre>
+</div>
+<div class="card">
+<h3>PATCH — Partial</h3>
+<pre><span class="fn">given</span>().contentType(ContentType.JSON)
+  .body(<span class="str">"""{"job":"Senior QA"}"""</span>)
+<span class="fn">.when</span>().patch(<span class="str">"/users/2"</span>)
+<span class="fn">.then</span>().statusCode(<span class="num">200</span>);</pre>
+</div>
+<div class="card">
+<h3>DELETE</h3>
+<pre><span class="fn">given</span>()
+<span class="fn">.when</span>().delete(<span class="str">"/users/2"</span>)
+<span class="fn">.then</span>().statusCode(<span class="num">204</span>);</pre>
+</div>
+<div class="card">
+<h3>🎮 Match the verb to the action</h3>
+<div id="verbMatch"></div>
+<button class="btn btn-success" onclick="completeModule('putdel')">Mark Complete ✓</button>
+</div>
+`,
+specs:`
+<h2 class="module-title">📋 Request & Response Specifications</h2>
+<p class="module-sub">DRY principle: define once, reuse everywhere.</p>
+<div class="card">
+<h3>RequestSpecification</h3>
+<pre><span class="kw">RequestSpecification</span> reqSpec = <span class="kw">new</span> RequestSpecBuilder()
+  .setBaseUri(<span class="str">"https://reqres.in/api"</span>)
+  .setContentType(ContentType.JSON)
+  .addHeader(<span class="str">"X-API-Key"</span>, <span class="str">"abc123"</span>)
+  .build();
+
+<span class="cm">// Use in every test:</span>
+<span class="fn">given</span>().spec(reqSpec).get(<span class="str">"/users/1"</span>).then().statusCode(<span class="num">200</span>);</pre>
+</div>
+<div class="card">
+<h3>ResponseSpecification</h3>
+<pre><span class="kw">ResponseSpecification</span> respSpec = <span class="kw">new</span> ResponseSpecBuilder()
+  .expectStatusCode(<span class="num">200</span>)
+  .expectContentType(ContentType.JSON)
+  .expectResponseTime(lessThan(<span class="num">2000L</span>))
+  .build();
+
+<span class="fn">given</span>().spec(reqSpec).get(<span class="str">"/users/1"</span>).then().spec(respSpec);</pre>
+</div>
+<div class="card">
+<h3>🎮 Why specs?</h3>
+<p>Which is the strongest reason to use Specs?</p>
+<div class="quiz-q" onclick="quizAnswer(this,false)">A) They make tests run faster</div>
+<div class="quiz-q" onclick="quizAnswer(this,true,'specs')">B) They eliminate duplication across hundreds of tests</div>
+<div class="quiz-q" onclick="quizAnswer(this,false)">C) They are required by RestAssured</div>
+<div class="feedback" id="fb-specs"></div>
+</div>
+`,
+jsonpath:`
+<h2 class="module-title">🎯 JSONPath Mastery</h2>
+<p class="module-sub">Extract anything from any response, fast.</p>
+<div class="card">
+<h3>Sample Response</h3>
+<pre>{
+  "page": <span class="num">1</span>,
+  "data": [
+    {"id":<span class="num">1</span>,"name":<span class="str">"Alice"</span>,"email":<span class="str">"a@x.com"</span>},
+    {"id":<span class="num">2</span>,"name":<span class="str">"Bob"</span>,"email":<span class="str">"b@x.com"</span>}
+  ]
+}</pre>
+</div>
+<div class="card">
+<h3>JSONPath Patterns</h3>
+<table>
+<tr><th>Expression</th><th>Returns</th></tr>
+<tr><td><code>data[0].name</code></td><td>"Alice"</td></tr>
+<tr><td><code>data.name</code></td><td>["Alice","Bob"]</td></tr>
+<tr><td><code>data.size()</code></td><td>2</td></tr>
+<tr><td><code>data.find {it.id==2}.email</code></td><td>"b@x.com"</td></tr>
+<tr><td><code>data.findAll {it.id>0}.name</code></td><td>["Alice","Bob"]</td></tr>
+</table>
+</div>
+<div class="card">
+<h3>🎮 JSONPath Challenge</h3>
+<div id="jsonChallenge"></div>
+<div class="feedback" id="fb-jsonpath"></div>
+</div>
+<div class="card">
+<h3>Extract into a variable</h3>
+<pre><span class="kw">String</span> name = <span class="fn">given</span>().get(<span class="str">"/users/1"</span>)
+  .then().extract().path(<span class="str">"data.first_name"</span>);
+
+<span class="kw">int</span> id = response.jsonPath().getInt(<span class="str">"data.id"</span>);
+List&lt;String&gt; names = response.jsonPath().getList(<span class="str">"data.name"</span>);</pre>
+</div>
+`,
+pojo:`
+<h2 class="module-title">🧬 POJOs & Serialization</h2>
+<p class="module-sub">Type-safe API testing — what seniors do in real frameworks.</p>
+<div class="card">
+<h3>Define the POJO</h3>
+<pre><span class="kw">public class</span> <span class="fn">User</span> {
+  <span class="kw">private</span> String name;
+  <span class="kw">private</span> String job;
+  <span class="cm">// getters, setters, constructor...</span>
+}</pre>
+</div>
+<div class="card">
+<h3>Send POJO (auto-serialization)</h3>
+<pre>User user = <span class="kw">new</span> User(<span class="str">"John"</span>, <span class="str">"QA Lead"</span>);
+
+<span class="fn">given</span>()
+  .contentType(ContentType.JSON)
+  .body(user)  <span class="cm">// auto → JSON</span>
+<span class="fn">.when</span>().post(<span class="str">"/users"</span>)
+<span class="fn">.then</span>().statusCode(<span class="num">201</span>);</pre>
+</div>
+<div class="card">
+<h3>Receive POJO (deserialization)</h3>
+<pre>User created = <span class="fn">given</span>()
+  .contentType(ContentType.JSON)
+  .body(user)
+.when().post(<span class="str">"/users"</span>)
+.then().statusCode(<span class="num">201</span>)
+.extract().as(User.<span class="kw">class</span>);
+
+assertThat(created.getName(), equalTo(<span class="str">"John"</span>));</pre>
+<p>✨ <b>Senior tip:</b> Use Lombok's @Data + Jackson annotations for clean POJOs.</p>
+</div>
+<button class="btn btn-success" onclick="completeModule('pojo')">Mark Complete ✓</button>
+`,
+schema:`
+<h2 class="module-title">✅ JSON Schema Validation</h2>
+<p class="module-sub">Catch contract drift before it hits production.</p>
+<div class="card">
+<h3>Why?</h3>
+<p>Backend renamed <code>first_name</code> → <code>firstName</code>. Your asserts pass (you only check status). Schema validation catches it.</p>
+</div>
+<div class="card">
+<h3>Schema file (user-schema.json)</h3>
+<pre>{
+  "type": "object",
+  "required": ["id","email"],
+  "properties": {
+    "id":    {"type":"integer"},
+    "email": {"type":"string","format":"email"}
+  }
+}</pre>
+</div>
+<div class="card">
+<h3>Use it</h3>
+<pre><span class="kw">import static</span> io.restassured.module.jsv.JsonSchemaValidator.matchesJsonSchemaInClasspath;
+
+<span class="fn">given</span>().get(<span class="str">"/users/2"</span>)
+<span class="fn">.then</span>()
+  .statusCode(<span class="num">200</span>)
+  .body(matchesJsonSchemaInClasspath(<span class="str">"user-schema.json"</span>));</pre>
+</div>
+<button class="btn btn-success" onclick="completeModule('schema')">Mark Complete ✓</button>
+`,
+auth:`
+<h2 class="module-title">🔐 Authentication</h2>
+<p class="module-sub">Every API has gates. Here's how to walk through them all.</p>
+<div class="card">
+<h3>Basic Auth</h3>
+<pre><span class="fn">given</span>().auth().basic(<span class="str">"user"</span>, <span class="str">"pass"</span>)
+.when().get(<span class="str">"/secure"</span>)
+.then().statusCode(<span class="num">200</span>);</pre>
+</div>
+<div class="card">
+<h3>Bearer Token</h3>
+<pre><span class="fn">given</span>().header(<span class="str">"Authorization"</span>, <span class="str">"Bearer "</span> + token)
+.when().get(<span class="str">"/me"</span>)
+.then().statusCode(<span class="num">200</span>);</pre>
+</div>
+<div class="card">
+<h3>OAuth 2.0</h3>
+<pre><span class="fn">given</span>().auth().oauth2(accessToken)
+.when().get(<span class="str">"/account"</span>)
+.then().statusCode(<span class="num">200</span>);</pre>
+</div>
+<div class="card">
+<h3>API Key (header / query)</h3>
+<pre>given().header(<span class="str">"X-API-Key"</span>, key)...
+given().queryParam(<span class="str">"api_key"</span>, key)...</pre>
+</div>
+<div class="card">
+<h3>🎮 Match the auth type</h3>
+<div id="authMatch"></div>
+<button class="btn btn-success" onclick="completeModule('auth')">Mark Complete ✓</button>
+</div>
+`,
+ssl:`
+<h2 class="module-title">🍪 SSL, Headers, Cookies</h2>
+<p class="module-sub">Real-world edge cases.</p>
+<div class="card">
+<h3>Relax SSL (test envs only!)</h3>
+<pre>RestAssured.useRelaxedHTTPSValidation();
+<span class="cm">// or:</span>
+given().relaxedHTTPSValidation()...</pre>
+</div>
+<div class="card">
+<h3>Headers</h3>
+<pre>given()
+  .header(<span class="str">"X-Request-ID"</span>, UUID.randomUUID().toString())
+  .headers(Map.of(<span class="str">"A"</span>,<span class="str">"1"</span>,<span class="str">"B"</span>,<span class="str">"2"</span>))
+...</pre>
+</div>
+<div class="card">
+<h3>Cookies</h3>
+<pre>given().cookie(<span class="str">"session"</span>, <span class="str">"abc123"</span>)
+.when().get(<span class="str">"/dashboard"</span>)
+.then().cookie(<span class="str">"refresh_token"</span>, notNullValue());</pre>
+</div>
+<button class="btn btn-success" onclick="completeModule('ssl')">Mark Complete ✓</button>
+`,
+files:`
+<h2 class="module-title">📎 File Upload & Download</h2>
+<div class="card">
+<h3>Multipart Upload</h3>
+<pre><span class="fn">given</span>()
+  .multiPart(<span class="str">"file"</span>, <span class="kw">new</span> File(<span class="str">"resume.pdf"</span>))
+  .multiPart(<span class="str">"description"</span>, <span class="str">"my CV"</span>)
+<span class="fn">.when</span>().post(<span class="str">"/upload"</span>)
+<span class="fn">.then</span>().statusCode(<span class="num">200</span>);</pre>
+</div>
+<div class="card">
+<h3>Download</h3>
+<pre><span class="kw">byte</span>[] pdf = <span class="fn">given</span>().get(<span class="str">"/files/123"</span>)
+  .then().statusCode(<span class="num">200</span>)
+  .extract().asByteArray();
+
+Files.write(Path.of(<span class="str">"out.pdf"</span>), pdf);</pre>
+</div>
+<button class="btn btn-success" onclick="completeModule('files')">Mark Complete ✓</button>
+`,
+filters:`
+<h2 class="module-title">🔍 Filters & Logging</h2>
+<p class="module-sub">Debug like a senior.</p>
+<div class="card">
+<h3>Log everything</h3>
+<pre><span class="fn">given</span>().log().all()
+.when().get(<span class="str">"/users/1"</span>)
+.then().log().all().statusCode(<span class="num">200</span>);</pre>
+</div>
+<div class="card">
+<h3>Log only on failure (clean output)</h3>
+<pre>given().log().ifValidationFails()
+.when().get(<span class="str">"/users/1"</span>)
+.then().log().ifValidationFails().statusCode(<span class="num">200</span>);</pre>
+</div>
+<div class="card">
+<h3>Custom Filter (e.g. attach Allure reports)</h3>
+<pre>RestAssured.filters(<span class="kw">new</span> AllureRestAssured());
+RestAssured.filters(<span class="kw">new</span> RequestLoggingFilter(),
+                    <span class="kw">new</span> ResponseLoggingFilter());</pre>
+</div>
+<button class="btn btn-success" onclick="completeModule('filters')">Mark Complete ✓</button>
+`,
+testng:`
+<h2 class="module-title">🧪 TestNG Integration</h2>
+<div class="card">
+<h3>The full test class</h3>
+<pre><span class="kw">public class</span> UserTests {
+
+  @<span class="fn">BeforeClass</span>
+  <span class="kw">public void</span> setup() {
+    RestAssured.baseURI = <span class="str">"https://reqres.in/api"</span>;
+  }
+
+  @<span class="fn">Test</span>(priority = <span class="num">1</span>)
+  <span class="kw">public void</span> getUserShouldReturn200() {
+    given().when().get(<span class="str">"/users/2"</span>)
+      .then().statusCode(<span class="num">200</span>);
+  }
+
+  @<span class="fn">Test</span>(priority = <span class="num">2</span>, dependsOnMethods=<span class="str">"getUserShouldReturn200"</span>)
+  <span class="kw">public void</span> createUser() {
+    given().contentType(ContentType.JSON)
+      .body(Map.of(<span class="str">"name"</span>,<span class="str">"X"</span>))
+    .when().post(<span class="str">"/users"</span>)
+    .then().statusCode(<span class="num">201</span>);
+  }
+}</pre>
+</div>
+<button class="btn btn-success" onclick="completeModule('testng')">Mark Complete ✓</button>
+`,
+ddt:`
+<h2 class="module-title">📊 Data-Driven Testing</h2>
+<div class="card">
+<h3>TestNG @DataProvider</h3>
+<pre>@<span class="fn">DataProvider</span>(name=<span class="str">"users"</span>)
+<span class="kw">public</span> Object[][] users() {
+  <span class="kw">return new</span> Object[][]{
+    {<span class="str">"John"</span>,<span class="str">"Dev"</span>},
+    {<span class="str">"Jane"</span>,<span class="str">"QA"</span>},
+    {<span class="str">"Joe"</span>,<span class="str">"PM"</span>}
+  };
+}
+
+@<span class="fn">Test</span>(dataProvider=<span class="str">"users"</span>)
+<span class="kw">public void</span> createUser(String name, String job) {
+  given().contentType(ContentType.JSON)
+    .body(Map.of(<span class="str">"name"</span>,name,<span class="str">"job"</span>,job))
+  .when().post(<span class="str">"/users"</span>)
+  .then().statusCode(<span class="num">201</span>);
+}</pre>
+</div>
+<div class="card">
+<h3>From Excel / CSV / JSON</h3>
+<p>Read with Apache POI / OpenCSV / Jackson, feed into <code>@DataProvider</code>.</p>
+</div>
+<button class="btn btn-success" onclick="completeModule('ddt')">Mark Complete ✓</button>
+`,
+cicd:`
+<h2 class="module-title">🚀 CI/CD & Reporting</h2>
+<div class="card">
+<h3>Maven Surefire</h3>
+<pre>mvn test -DsuiteXmlFile=testng.xml -Denv=staging</pre>
+</div>
+<div class="card">
+<h3>GitHub Actions snippet</h3>
+<pre>- <span class="kw">name</span>: <span class="str">Run API Tests</span>
+  <span class="kw">run</span>: mvn -B test
+- <span class="kw">name</span>: <span class="str">Allure Report</span>
+  <span class="kw">uses</span>: simple-elf/allure-report-action@v1.7</pre>
+</div>
+<div class="card">
+<h3>Reporting Stack</h3>
+<ul>
+<li><b>Allure</b> — beautiful HTML reports with steps & attachments</li>
+<li><b>ExtentReports</b> — popular in enterprise</li>
+<li><b>Surefire HTML</b> — basic but always there</li>
+</ul>
+</div>
+<button class="btn btn-success" onclick="completeModule('cicd')">Mark Complete ✓</button>
+`,
+patterns:`
+<h2 class="module-title">🏗️ Framework Architecture (Senior Tier)</h2>
+<p class="module-sub">What separates a tester from a senior tester.</p>
+<div class="card">
+<h3>Recommended Layers</h3>
+<pre>src/
+ ├ test/
+ │  ├ tests/          <span class="cm">// test classes</span>
+ │  ├ services/       <span class="cm">// API client wrappers per endpoint</span>
+ │  ├ models/         <span class="cm">// POJOs (request/response)</span>
+ │  ├ utils/          <span class="cm">// JWT generators, file helpers</span>
+ │  ├ config/         <span class="cm">// env config + RequestSpec builders</span>
+ │  └ data/           <span class="cm">// JSON/CSV test fixtures</span>
+ └ resources/
+    └ schemas/        <span class="cm">// JSON schemas</span></pre>
+</div>
+<div class="card">
+<h3>Service wrapper example</h3>
+<pre><span class="kw">public class</span> UserService {
+  <span class="kw">private final</span> RequestSpecification spec = SpecFactory.json();
+
+  <span class="kw">public</span> Response getUser(<span class="kw">int</span> id) {
+    <span class="kw">return</span> given().spec(spec).get(<span class="str">"/users/"</span>+id);
+  }
+  <span class="kw">public</span> User createUser(User u) {
+    <span class="kw">return</span> given().spec(spec).body(u).post(<span class="str">"/users"</span>)
+      .then().statusCode(<span class="num">201</span>).extract().as(User.<span class="kw">class</span>);
+  }
+}</pre>
+<p>Test classes call <code>userService.getUser(2)</code> — never raw HTTP.</p>
+</div>
+<div class="card">
+<h3>Senior Best Practices Checklist</h3>
+<ul>
+<li>✅ No hard-coded URLs — env-driven config</li>
+<li>✅ One assertion concept per test</li>
+<li>✅ Parallel-safe (no static state per test)</li>
+<li>✅ Tests independent (no execution order dependency)</li>
+<li>✅ Schema validation on every response</li>
+<li>✅ Negative tests (401, 403, 422) >= positive tests</li>
+<li>✅ Response time assertions on critical paths</li>
+<li>✅ Secrets via env vars / Vault, never committed</li>
+</ul>
+</div>
+<button class="btn btn-success" onclick="completeModule('patterns')">Mark Complete ✓</button>
+`,
+interview:`
+<h2 class="module-title">👑 Boss Battle: Senior Interview</h2>
+<p class="module-sub">10 rapid-fire questions. Score 8+ to earn the crown.</p>
+<div class="card">
+<h3>🎮 Interview Quiz</h3>
+<div id="interviewQuiz"></div>
+<div class="feedback" id="fb-interview"></div>
+<button class="btn" id="startQuiz" onclick="startInterview()">Start Boss Battle 🏆</button>
+</div>
+`,
+};
+
+/* ========= STATE ========= */
+let state = {completed:{}, xp:0};
+try {
+  const stored = localStorage.getItem('ra-state');
+  if(stored) state = Object.assign(state, JSON.parse(stored));
+} catch(e){ console.warn('localStorage unavailable', e); }
+state.completed = state.completed || {};
+state.xp = state.xp || 0;
+let currentModule = 'intro';
+
+function save(){
+  try { localStorage.setItem('ra-state', JSON.stringify(state)); }
+  catch(e){}
+}
+
+/* ========= SIDEBAR RENDER ========= */
+function renderSidebar(){
+  const sb = document.getElementById('sidebar');
+  sb.innerHTML = '';
+  MODULES.forEach(p=>{
+    const ph = document.createElement('div');
+    ph.className = 'phase';
+    ph.innerHTML = `<div class="phase-title">${p.phase}</div>`;
+    p.items.forEach(it=>{
+      const el = document.createElement('div');
+      el.className = 'nav-item' + (it.id===currentModule?' active':'') + (state.completed[it.id]?' done':'');
+      el.innerHTML = `<span>${it.icon}</span><span style="flex:1">${it.title}</span><span class="check">${state.completed[it.id]?'✓':''}</span>`;
+      el.onclick = ()=>loadModule(it.id);
+      ph.appendChild(el);
+    });
+    sb.appendChild(ph);
+  });
+  updateProgress();
+}
+
+function updateProgress(){
+  const total = MODULES.flatMap(p=>p.items).length;
+  const done = Object.values(state.completed).filter(Boolean).length;
+  const pct = (done/total)*100;
+  document.getElementById('progressFill').style.width = pct + '%';
+  document.getElementById('progressText').textContent = `${done} / ${total} modules complete`;
+  document.getElementById('xp').textContent = state.xp;
+}
+
+function loadModule(id){
+  currentModule = id;
+  document.getElementById('main').innerHTML = `<div class="module active">${CONTENT[id]||'<p>Coming soon...</p>'}</div>`;
+  renderSidebar();
+  initGames(id);
+  window.scrollTo(0,0);
+  if(window.innerWidth<900) document.getElementById('sidebar').classList.remove('open');
+}
+
+function completeModule(id){
+  if(!state.completed[id]){
+    state.completed[id] = true;
+    state.xp += 100;
+    save();
+    levelUp(`+100 XP — ${id} complete!`);
+  }
+  renderSidebar();
+}
+
+function levelUp(text){
+  const el = document.getElementById('levelUp');
+  document.getElementById('levelUpText').textContent = '🎉 ' + text;
+  el.classList.add('show');
+  setTimeout(()=>el.classList.remove('show'),1500);
+}
+
+function quizAnswer(el, correct, moduleId){
+  document.querySelectorAll('.quiz-q').forEach(q=>q.classList.remove('correct','wrong'));
+  if(correct){
+    el.classList.add('correct');
+    const fb = document.getElementById('fb-'+moduleId);
+    if(fb){fb.className='feedback show ok';fb.textContent='✅ Correct! +50 XP';}
+    state.xp += 50; save(); updateProgress();
+    if(moduleId) completeModule(moduleId);
+  } else {
+    el.classList.add('wrong');
+    document.querySelectorAll('[id^="fb-"]').forEach(f=>{f.className='feedback show err';f.textContent='❌ Try again!';});
+  }
+}
+
+function resetProgress(){
+  if(!confirm('Wipe all progress?')) return;
+  state = {completed:{},xp:0};
+  save();
+  loadModule('intro');
+}
+
+/* ========= GAMES ========= */
+
+// Status Code Game
+const STATUS_ROUNDS = [
+  {q:"User submitted a form with missing required fields. Server rejects it.", correct:"400"},
+  {q:"You sent valid creds but the user doesn't have permission for this resource.", correct:"403"},
+  {q:"POST /users created a new user successfully.", correct:"201"},
+  {q:"You forgot to include the auth token in headers.", correct:"401"},
+  {q:"The endpoint /v3/users doesn't exist on this server.", correct:"404"},
+  {q:"Server has a NullPointerException in the handler.", correct:"500"},
+  {q:"DELETE /users/5 succeeded but there's nothing to return.", correct:"204"},
+];
+const STATUS_OPTIONS = ["200","201","204","301","400","401","403","404","429","500"];
+let statusRound = 0;
+
+function nextStatusRound(){
+  if(statusRound >= STATUS_ROUNDS.length){
+    document.getElementById('statusGame').innerHTML = '<p>🏆 All scenarios complete!</p>';
+    document.getElementById('statusGrid').innerHTML = '';
+    completeModule('http');
+    return;
+  }
+  const r = STATUS_ROUNDS[statusRound];
+  document.getElementById('statusGame').innerHTML = `<p><b>Scenario ${statusRound+1}/${STATUS_ROUNDS.length}:</b> ${r.q}</p>`;
+  const grid = document.getElementById('statusGrid');
+  grid.innerHTML = '';
+  STATUS_OPTIONS.forEach(opt=>{
+    const c = document.createElement('div');
+    c.className = 'status-card';
+    c.textContent = opt;
+    c.onclick = ()=>checkStatus(c, opt, r.correct);
+    grid.appendChild(c);
+  });
+  document.getElementById('fb-http').className='feedback';
+}
+
+function checkStatus(card, picked, correct){
+  const fb = document.getElementById('fb-http');
+  if(picked===correct){
+    card.classList.add('selected');
+    fb.className='feedback show ok';
+    fb.textContent='✅ Right! +30 XP';
+    state.xp += 30; save(); updateProgress();
+    statusRound++;
+  } else {
+    fb.className='feedback show err';
+    fb.textContent=`❌ Nope — it's ${correct}`;
+  }
+}
+
+// BDD drag-drop
+function setupDrag(){
+  const items = document.querySelectorAll('.drag-item');
+  items.forEach(it=>{
+    it.addEventListener('dragstart',e=>{
+      it.classList.add('dragging');
+      e.dataTransfer.setData('text/plain', it.dataset.order || it.textContent);
+      e.dataTransfer.effectAllowed = 'move';
+    });
+    it.addEventListener('dragend',()=>it.classList.remove('dragging'));
+  });
+  document.querySelectorAll('.drop-zone').forEach(z=>{
+    z.addEventListener('dragover',e=>{e.preventDefault();z.classList.add('over');});
+    z.addEventListener('dragleave',()=>z.classList.remove('over'));
+    z.addEventListener('drop',e=>{
+      e.preventDefault();
+      z.classList.remove('over');
+      const dragging = document.querySelector('.dragging');
+      if(dragging) z.appendChild(dragging);
+    });
+  });
+}
+
+function checkBDD(){
+  const zones = document.querySelectorAll('.bdd-zone');
+  let ok = true;
+  zones.forEach(z=>{
+    const item = z.querySelector('.drag-item');
+    if(!item || item.dataset.order !== z.dataset.pos) ok = false;
+  });
+  const fb = document.getElementById('fb-bdd');
+  if(ok){
+    fb.className='feedback show ok';
+    fb.textContent='✅ Perfect BDD flow! +75 XP';
+    state.xp += 75; save();
+    completeModule('bdd');
+  } else {
+    fb.className='feedback show err';
+    fb.textContent='❌ Order is off — Given (setup) → When (action) → Then (assert)';
+  }
+}
+
+// GET simulation
+function simulateGet(){
+  const url = document.getElementById('getUrl').value;
+  const id = document.getElementById('getId').value;
+  const fake = {
+    "data":{"id":parseInt(id)||2,"email":"janet.weaver@reqres.in","first_name":"Janet","last_name":"Weaver","avatar":"https://reqres.in/img/faces/2-image.jpg"},
+    "support":{"url":"https://reqres.in/#support-heading"}
+  };
+  document.getElementById('getResp').textContent =
+    `Status: 200 OK\nResponse time: 142ms\n\n${JSON.stringify(fake,null,2)}`;
+  state.xp += 20; save(); updateProgress();
+}
+
+// JSONPath challenge
+const JSON_CHALLENGES = [
+  {hint:"Get Alice's email", answer:"data[0].email"},
+  {hint:"Get all names as a list", answer:"data.name"},
+  {hint:"Count items in data", answer:"data.size()"},
+];
+let jsonChallengeIdx = 0;
+function renderJsonChallenge(){
+  if(jsonChallengeIdx >= JSON_CHALLENGES.length){
+    document.getElementById('jsonChallenge').innerHTML = '<p>🏆 JSONPath mastered!</p>';
+    completeModule('jsonpath');
+    return;
+  }
+  const c = JSON_CHALLENGES[jsonChallengeIdx];
+  document.getElementById('jsonChallenge').innerHTML = `
+    <p><b>Challenge ${jsonChallengeIdx+1}/${JSON_CHALLENGES.length}:</b> ${c.hint}</p>
+    <input class="editor" style="min-height:auto;padding:8px" id="jsonAns" placeholder="Type JSONPath expression..."/>
+    <button class="btn" onclick="checkJson()" style="margin-top:8px">Check</button>
+  `;
+}
+function checkJson(){
+  const ans = document.getElementById('jsonAns').value.trim().replace(/['"]/g,'');
+  const c = JSON_CHALLENGES[jsonChallengeIdx];
+  const fb = document.getElementById('fb-jsonpath');
+  if(ans === c.answer){
+    fb.className='feedback show ok';
+    fb.textContent='✅ Nailed it! +40 XP';
+    state.xp += 40; save();
+    jsonChallengeIdx++;
+    setTimeout(renderJsonChallenge,800);
+  } else {
+    fb.className='feedback show err';
+    fb.textContent=`❌ Expected: ${c.answer}`;
+  }
+}
+
+// Verb match game
+function renderVerbMatch(){
+  const verbs = [
+    {v:"GET",act:"Read a resource"},
+    {v:"POST",act:"Create a new resource"},
+    {v:"PUT",act:"Replace a resource entirely"},
+    {v:"PATCH",act:"Update part of a resource"},
+    {v:"DELETE",act:"Remove a resource"},
+  ];
+  const shuffled = [...verbs].sort(()=>Math.random()-0.5);
+  let html = '<table><tr><th>Action</th><th>Pick Verb</th></tr>';
+  shuffled.forEach((row,i)=>{
+    html += `<tr><td>${row.act}</td><td><select id="verb-${i}" data-correct="${row.v}">
+      <option value="">--</option>${verbs.map(v=>`<option>${v.v}</option>`).join('')}
+    </select></td></tr>`;
+  });
+  html += '</table><button class="btn" onclick="checkVerbs(' + shuffled.length + ')">Check</button>';
+  document.getElementById('verbMatch').innerHTML = html;
+}
+function checkVerbs(n){
+  let ok = 0;
+  for(let i=0;i<n;i++){
+    const s = document.getElementById('verb-'+i);
+    if(s.value === s.dataset.correct) ok++;
+  }
+  alert(`Score: ${ok}/${n}`);
+  if(ok===n){state.xp += 50; save(); updateProgress();}
+}
+
+// Auth match
+function renderAuthMatch(){
+  const pairs = [
+    {scenario:"Public API with simple username/password", a:"Basic Auth"},
+    {scenario:"User logs in, server returns JWT for subsequent calls", a:"Bearer Token"},
+    {scenario:"Third-party app accesses user's Google data", a:"OAuth 2.0"},
+    {scenario:"Service-to-service identification with a static secret", a:"API Key"},
+  ];
+  const opts = ["Basic Auth","Bearer Token","OAuth 2.0","API Key"];
+  let html = '<table><tr><th>Scenario</th><th>Auth Type</th></tr>';
+  pairs.forEach((p,i)=>{
+    html += `<tr><td>${p.scenario}</td><td><select id="auth-${i}" data-correct="${p.a}">
+      <option value="">--</option>${opts.map(o=>`<option>${o}</option>`).join('')}
+    </select></td></tr>`;
+  });
+  html += `</table><button class="btn" onclick="checkAuth(${pairs.length})">Check</button>`;
+  document.getElementById('authMatch').innerHTML = html;
+}
+function checkAuth(n){
+  let ok = 0;
+  for(let i=0;i<n;i++){
+    const s = document.getElementById('auth-'+i);
+    if(s.value === s.dataset.correct) ok++;
+  }
+  alert(`Score: ${ok}/${n}`);
+  if(ok===n){state.xp += 80; save(); updateProgress();}
+}
+
+// Interview Boss Battle
+const INTERVIEW = [
+  {q:"What's the difference between PUT and PATCH?", opts:["PUT updates partially, PATCH replaces fully","PUT replaces the whole resource, PATCH updates partially","No difference","PUT is faster"], correct:1},
+  {q:"Which library does RestAssured use for assertions?", opts:["JUnit","Hamcrest Matchers","AssertJ","Mockito"], correct:1},
+  {q:"How do you reuse common request setup across tests?", opts:["Copy-paste","RequestSpecification","Static variables","@BeforeEach only"], correct:1},
+  {q:"What's the best way to validate that response structure hasn't changed?", opts:["Manual review","JSON Schema validation","Print and eyeball","Status code check"], correct:1},
+  {q:"How do you extract a value from a response?", opts:[".getBody().toString()",".extract().path(\"jsonPath\")",".response().get()",".result()"], correct:1},
+  {q:"What status code for successful DELETE with no body?", opts:["200","201","204","404"], correct:2},
+  {q:"How do you handle environment-specific base URLs?", opts:["Hard-code per branch","Config files + env variables","Mock everything","Skip env testing"], correct:1},
+  {q:"What's wrong with .auth().basic() in production tests?", opts:["Nothing","Credentials shouldn't be in source — use env vars/Vault","Too slow","Not supported"], correct:1},
+  {q:"How do you assert response time < 2s?", opts:[".time(lessThan(2000L))","manual stopwatch","not possible","status check"], correct:0},
+  {q:"How should a senior structure POJOs for requests?", opts:["One mega POJO","Per-endpoint, with Lombok/Jackson, in a models package","Maps only","Strings only"], correct:1},
+];
+let qIdx = 0, qScore = 0;
+function startInterview(){
+  qIdx = 0; qScore = 0;
+  document.getElementById('startQuiz').style.display='none';
+  renderInterviewQ();
+}
+function renderInterviewQ(){
+  if(qIdx >= INTERVIEW.length){
+    const div = document.getElementById('interviewQuiz');
+    div.innerHTML = `<h3 style="font-size:24px;text-align:center">Final Score: ${qScore}/${INTERVIEW.length}</h3>`;
+    if(qScore >= 8){
+      div.innerHTML += `<p style="text-align:center;font-size:20px">👑 You earned the SENIOR TESTER crown!</p>`;
+      state.xp += 500;
+      completeModule('interview');
+    } else {
+      div.innerHTML += `<p style="text-align:center">Keep reviewing the modules and try again!</p><button class="btn" onclick="startInterview()">Retry</button>`;
+    }
+    save(); updateProgress();
+    return;
+  }
+  const q = INTERVIEW[qIdx];
+  let html = `<p><b>Q${qIdx+1}/${INTERVIEW.length}:</b> ${q.q}</p>`;
+  q.opts.forEach((o,i)=>{
+    html += `<div class="quiz-q" onclick="ansInterview(${i})">${String.fromCharCode(65+i)}) ${o}</div>`;
+  });
+  document.getElementById('interviewQuiz').innerHTML = html;
+}
+function ansInterview(i){
+  const q = INTERVIEW[qIdx];
+  const fb = document.getElementById('fb-interview');
+  if(i===q.correct){
+    qScore++;
+    fb.className='feedback show ok';
+    fb.textContent=`✅ Correct! (${qScore}/${qIdx+1})`;
+  } else {
+    fb.className='feedback show err';
+    fb.textContent=`❌ Correct answer: ${q.opts[q.correct]}`;
+  }
+  qIdx++;
+  setTimeout(renderInterviewQ, 900);
+}
+
+/* ========= INIT GAMES PER MODULE ========= */
+function initGames(id){
+  if(id==='http'){ statusRound=0; nextStatusRound(); }
+  if(id==='bdd' || id==='setup'){ setupDrag(); }
+  if(id==='jsonpath'){ jsonChallengeIdx=0; renderJsonChallenge(); }
+  if(id==='putdel'){ renderVerbMatch(); }
+  if(id==='auth'){ renderAuthMatch(); }
+}
+
+/* ========= BOOT ========= */
+try {
+  renderSidebar();
+  loadModule('intro');
+} catch(e){
+  console.error('Boot error:', e);
+  document.getElementById('main').innerHTML =
+    '<div style="padding:30px"><h2 style="color:#ff5d6c">⚠️ Script error</h2>'+
+    '<pre style="background:#0a0f24;padding:14px;border-radius:8px;color:#cfd8ff;white-space:pre-wrap">'+
+    (e && e.stack ? e.stack : String(e))+'</pre></div>';
+}
+</script>
+</body>
+</html>
